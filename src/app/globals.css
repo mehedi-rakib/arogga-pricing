@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #12141c;
+  --panel: #191d28;
+  --panel-2: #212636;
+  --line: #2c3246;
+  --line-soft: #232838;
+  --text: #e7e9ef;
+  --muted: #8991a6;
+  --dim: #5f677c;
+  --cost: #7c6bf2;
+  --b2b: #35d0a5;
+  --b2c: #f2a63b;
+  --mrp: #5a6377;
+  --alert: #ff6b6b;
+  --r: 10px;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --display: 'Space Grotesk', system-ui, sans-serif;
+}
+
+@theme inline {
+  --font-mono: var(--mono);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.5 Inter, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  background: none;
+  border: 0;
+}
+
+:focus-visible {
+  outline: 2px solid var(--b2b);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--panel);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 3px;
+}
+
+/* skeleton pulse */
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
