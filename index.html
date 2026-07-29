@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Price Desk — Arogga catalog</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#12141c;
+  --panel:#191d28;
+  --panel-2:#212636;
+  --line:#2c3246;
+  --line-soft:#232838;
+  --text:#e7e9ef;
+  --muted:#8991a6;
+  --dim:#5f677c;
+
+  /* price tiers — each colour is bound to one meaning, everywhere */
+  --cost:#7c6bf2;
+  --b2b:#35d0a5;
+  --b2c:#f2a63b;
+  --mrp:#5a6377;
+  --alert:#ff6b6b;
+
+  --r:10px;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font:15px/1.5 Inter,system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0}
+:focus-visible{outline:2px solid var(--b2b);outline-offset:2px;border-radius:4px}
+
+/* ---------- shell ---------- */
+.wrap{max-width:1280px;margin:0 auto;padding:0 22px}
+
+header.top{
+  border-bottom:1px solid var(--line-soft);
+  background:linear-gradient(180deg,#161a24,#12141c);
+  position:sticky;top:0;z-index:40;
+}
+.top-in{display:flex;align-items:center;gap:18px;padding:14px 0}
+.mark{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-.02em;font-size:18px;white-space:nowrap}
+.mark span{color:var(--b2b)}
+.mark small{display:block;font:400 10px/1 var(--mono);letter-spacing:.16em;color:var(--dim);text-transform:uppercase;margin-top:3px}
+.conn{margin-left:auto;font:500 11px/1 var(--mono);color:var(--dim);display:flex;align-items:center;gap:7px;white-space:nowrap}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--dim)}
+.dot.ok{background:var(--b2b);box-shadow:0 0 0 3px rgba(53,208,165,.15)}
+.dot.warn{background:var(--b2c)}
+.dot.bad{background:var(--alert)}
+
+/* ---------- search ---------- */
+.hero{padding:34px 0 20px}
+.searchbox{position:relative;display:flex;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:6px 6px 6px 18px;transition:border-color .15s,box-shadow .15s}
+.searchbox:focus-within{border-color:var(--b2b);box-shadow:0 0 0 4px rgba(53,208,165,.09)}
+.searchbox svg{flex:none;color:var(--dim)}
+#q{flex:1;background:none;border:0;outline:0;padding:14px 14px;font-size:17px;font-family:'Space Grotesk',sans-serif;letter-spacing:-.01em}
+#q::placeholder{color:var(--dim);font-family:Inter,sans-serif;font-size:15px;letter-spacing:0}
+.go{background:var(--b2b);color:#06251c;font-weight:600;padding:12px 22px;border-radius:9px;font-size:14px}
+.go:hover{filter:brightness(1.08)}
+
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.chip{border:1px solid var(--line);border-radius:99px;padding:6px 13px;font-size:12.5px;color:var(--muted);background:var(--panel)}
+.chip:hover{border-color:var(--b2b);color:var(--text)}
+
+/* ---------- toolbar ---------- */
+.bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:16px 0;border-top:1px solid var(--line-soft);margin-top:22px}
+.count{font:500 12px/1 var(--mono);color:var(--muted);letter-spacing:.04em}
+.count b{color:var(--text)}
+.ctrl{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.ctrl label{font:500 11px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+select{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px}
+
+/* ---------- grid ---------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:16px;padding-bottom:40px}
+.card{
+  background:var(--panel);border:1px solid var(--line-soft);border-radius:var(--r);
+  overflow:hidden;text-align:left;display:flex;flex-direction:column;
+  transition:transform .16s ease,border-color .16s,box-shadow .16s;
+}
+.card:hover{transform:translateY(-3px);border-color:var(--line);box-shadow:0 12px 28px -14px #000}
+.thumb{position:relative;aspect-ratio:1;background:#fff;display:grid;place-items:center;padding:12px}
+.thumb img{max-width:100%;max-height:100%;object-fit:contain;mix-blend-mode:multiply}
+.thumb .none{font:500 11px var(--mono);color:#b9bcc4}
+.flags{position:absolute;top:8px;left:8px;display:flex;flex-direction:column;gap:5px;align-items:flex-start}
+.flag{font:600 9.5px/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;padding:4px 7px;border-radius:5px;background:#111;color:#fff}
+.flag.sale{background:var(--b2c);color:#2a1a02}
+.flag.out{background:var(--alert);color:#2b0707}
+.body{padding:13px 14px 14px;display:flex;flex-direction:column;gap:9px;flex:1}
+.eyebrow{font:500 10px/1 var(--mono);letter-spacing:.13em;text-transform:uppercase;color:var(--dim);display:flex;justify-content:space-between;gap:8px}
+.name{font-size:13.5px;line-height:1.4;font-weight:500;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:38px}
+.price-row{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-top:auto}
+.p-b2b{font-family:var(--mono);font-weight:600;font-size:21px;color:var(--b2b);letter-spacing:-.02em}
+.p-mrp{font-family:var(--mono);font-size:12px;color:var(--dim);text-decoration:line-through}
+.p-off{font:600 10px/1 var(--mono);color:var(--b2c);border:1px solid rgba(242,166,59,.35);border-radius:4px;padding:3px 5px}
+.mini{height:5px;border-radius:3px;overflow:hidden;display:flex;background:var(--line-soft)}
+.mini i{display:block;height:100%}
+.foot{display:flex;justify-content:space-between;align-items:center;font:500 11px/1 var(--mono);color:var(--dim);padding-top:2px}
+.mg{padding:4px 7px;border-radius:5px;font-weight:600}
+.mg.good{background:rgba(53,208,165,.13);color:var(--b2b)}
+.mg.mid{background:rgba(242,166,59,.13);color:var(--b2c)}
+.mg.bad{background:rgba(255,107,107,.13);color:var(--alert)}
+
+/* ---------- states ---------- */
+.state{padding:70px 20px;text-align:center;color:var(--muted)}
+.state h3{font-family:'Space Grotesk',sans-serif;color:var(--text);margin:0 0 8px;font-size:18px}
+.state p{margin:0;font-size:14px}
+.state code{font-family:var(--mono);font-size:12px;color:var(--b2c)}
+.skel{background:var(--panel);border:1px solid var(--line-soft);border-radius:var(--r);height:300px;animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.45}50%{opacity:.8}}
+
+.pager{display:flex;justify-content:center;align-items:center;gap:12px;padding:8px 0 60px}
+.pager button{border:1px solid var(--line);border-radius:8px;padding:9px 16px;font:500 13px var(--mono);background:var(--panel)}
+.pager button:disabled{opacity:.35;cursor:not-allowed}
+.pager span{font:500 12px var(--mono);color:var(--muted)}
+
+/* ---------- drawer ---------- */
+.scrim{position:fixed;inset:0;background:rgba(6,8,12,.7);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .2s;z-index:50}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{
+  position:fixed;top:0;right:0;height:100%;width:min(760px,100%);z-index:60;
+  background:var(--bg);border-left:1px solid var(--line);
+  transform:translateX(102%);transition:transform .26s cubic-bezier(.32,.72,0,1);
+  overflow-y:auto;overscroll-behavior:contain;
+}
+.drawer.on{transform:none}
+.d-head{position:sticky;top:0;background:linear-gradient(180deg,#161a24 70%,rgba(22,26,36,0));padding:18px 24px 22px;z-index:2;display:flex;gap:16px;align-items:flex-start}
+.d-head h2{font-family:'Space Grotesk',sans-serif;font-size:19px;line-height:1.32;margin:6px 0 8px;letter-spacing:-.01em}
+.close{flex:none;width:34px;height:34px;border:1px solid var(--line);border-radius:8px;display:grid;place-items:center;background:var(--panel);font-size:16px;color:var(--muted)}
+.close:hover{color:var(--text);border-color:var(--muted)}
+.d-body{padding:0 24px 60px;display:flex;flex-direction:column;gap:26px}
+.meta{display:flex;gap:8px;flex-wrap:wrap;font:500 10.5px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.meta b{color:var(--b2b);font-weight:600}
+
+section h4{
+  font:600 10.5px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--dim);
+  margin:0 0 14px;padding-bottom:9px;border-bottom:1px solid var(--line-soft);
+}
+
+/* signature: the price ladder */
+.ladder{background:var(--panel);border:1px solid var(--line-soft);border-radius:12px;padding:20px}
+.track{display:flex;height:46px;border-radius:8px;overflow:hidden;background:var(--line-soft)}
+.seg{position:relative;display:flex;align-items:center;justify-content:center;font:600 11px var(--mono);min-width:0;transition:filter .15s}
+.seg span{padding:0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.seg.s-cost{background:var(--cost);color:#0d0722}
+.seg.s-a{background:rgba(53,208,165,.85);color:#052a20}
+.seg.s-b{background:rgba(242,166,59,.8);color:#2a1a02}
+.seg.s-head{background:repeating-linear-gradient(115deg,#2a3044,#2a3044 6px,#232838 6px,#232838 12px);color:var(--muted)}
+.scale{display:flex;justify-content:space-between;font:500 10px var(--mono);color:var(--dim);margin-top:8px}
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-top:18px}
+.lg{border-left:3px solid;padding-left:11px}
+.lg .k{font:500 9.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:6px}
+.lg .v{font-family:var(--mono);font-weight:600;font-size:18px;letter-spacing:-.02em}
+.lg .s{font:500 10.5px var(--mono);color:var(--dim);margin-top:3px}
+
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:12px}
+.tile{background:var(--panel);border:1px solid var(--line-soft);border-radius:10px;padding:14px}
+.tile .k{font:500 9.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.tile .v{font-family:var(--mono);font-weight:600;font-size:20px;margin-top:9px;letter-spacing:-.02em}
+.tile .s{font:500 11px var(--mono);color:var(--dim);margin-top:5px}
+.tile.hl{border-color:rgba(53,208,165,.3);background:linear-gradient(180deg,rgba(53,208,165,.07),var(--panel))}
+
+table.kv{width:100%;border-collapse:collapse;font-size:13.5px}
+table.kv td{padding:11px 0;border-bottom:1px solid var(--line-soft)}
+table.kv tr:last-child td{border-bottom:0}
+table.kv td:first-child{color:var(--muted)}
+table.kv td:last-child{text-align:right;font-family:var(--mono);font-weight:500}
+.note{font-size:12.5px;line-height:1.55;color:var(--muted);background:rgba(242,166,59,.07);border:1px solid rgba(242,166,59,.22);border-radius:9px;padding:12px 14px;margin-top:14px}
+.note b{color:var(--b2c)}
+
+.gal{display:flex;gap:9px;overflow-x:auto;padding-bottom:6px}
+.gal img{width:82px;height:82px;flex:none;object-fit:contain;background:#fff;border-radius:8px;padding:6px;cursor:zoom-in}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font:500 10.5px var(--mono);color:var(--muted);border:1px solid var(--line);border-radius:5px;padding:4px 8px}
+.desc{font-size:13.5px;line-height:1.65;color:var(--muted);white-space:pre-line}
+details summary{cursor:pointer;font:600 10.5px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--dim);padding:12px 0}
+details pre{background:#0c0e14;border:1px solid var(--line-soft);border-radius:9px;padding:14px;overflow:auto;max-height:340px;font-family:var(--mono);font-size:11.5px;line-height:1.6;color:#9fb3c8}
+
+@media (max-width:640px){
+  .wrap{padding:0 14px}
+  .hero{padding:22px 0 14px}
+  #q{font-size:16px;padding:12px 10px}
+  .go{padding:11px 15px}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:11px}
+  .d-head,.d-body{padding-left:16px;padding-right:16px}
+  .track{height:38px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap top-in">
+    <div class="mark">price<span>·</span>desk<small>arogga catalog</small></div>
+    <div class="conn"><i class="dot" id="dot"></i><span id="connText">idle</span></div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="hero">
+    <div class="searchbox">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" placeholder="Search the catalog — try simple, napa, cetaphil, vitamin c…" autocomplete="off" spellcheck="false">
+      <button class="go" id="goBtn">Search</button>
+    </div>
+    <div class="chips" id="chips"></div>
+  </div>
+
+  <div class="bar">
+    <div class="count" id="count">Type a product name to begin.</div>
+    <div class="ctrl">
+      <label for="sort">Sort</label>
+      <select id="sort">
+        <option value="rel">Relevance</option>
+        <option value="mgB2b">B2B margin — high to low</option>
+        <option value="profit">Profit per unit</option>
+        <option value="priceAsc">B2B price — low to high</option>
+        <option value="priceDesc">B2B price — high to low</option>
+        <option value="orders">Most ordered</option>
+      </select>
+      <label for="per">Per page</label>
+      <select id="per"><option>10</option><option selected>24</option><option>48</option></select>
+    </div>
+  </div>
+
+  <div id="out"></div>
+  <div class="pager" id="pager" hidden>
+    <button id="prev">← Previous</button>
+    <span id="pageLbl"></span>
+    <button id="next">Next →</button>
+  </div>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="Product pricing detail"></aside>
+
+<script>
+/* ============================================================
+   Arogga price desk
+   Search → grid (B2B price + real margin) → full price teardown
+   ============================================================ */
+
+const API = 'https://api.arogga.com/general/v3/search';
+let state = { q:'', page:1, per:24, total:0, rows:[], sort:'rel' };
+
+const $ = s => document.querySelector(s);
+const out = $('#out'), dot = $('#dot'), connText = $('#connText');
+
+/* ---------- helpers ---------- */
+const bdt = n => '৳' + Number(n||0).toLocaleString('en-BD',{maximumFractionDigits:2});
+const pct = n => (Number(n)||0).toFixed(1) + '%';
+const esc = s => String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* the whole point of the tool: real numbers, not the API's headline figure */
+function analyse(p){
+  const v = (p.pv && p.pv[0]) || {};
+  const mrp      = +v.pv_mrp || +v.pv_b2c_mrp || 0;
+  const b2b      = +v.pv_b2b_discounted_price || +v.pv_b2b_price || 0;
+  const b2c      = +v.pv_b2c_discounted_price || +v.pv_b2c_price || 0;
+  const cost     = +v.pv_purchase_price || 0;
+
+  const profitB2b = b2b - cost, profitB2c = b2c - cost;
+  return {
+    v, mrp, b2b, b2c, cost, profitB2b, profitB2c,
+    mgB2b:  b2b  ? profitB2b / b2b * 100 : 0,   // margin on the B2B selling price
+    mgB2c:  b2c  ? profitB2c / b2c * 100 : 0,   // === pv_m_percentage
+    mkB2b:  cost ? profitB2b / cost * 100 : 0,  // markup over cost
+    mkB2c:  cost ? profitB2c / cost * 100 : 0,
+    spread: b2c - b2b,
+    inStock: v.pv_stock_status === 1 && p.p_allow_sales === 1
+  };
+}
+const mgClass = m => m >= 20 ? 'good' : m >= 8 ? 'mid' : 'bad';
+
+function image(p){
+  if (p.POSTER) return p.POSTER;
+  const a = p.attachedFiles_p_images || [];
+  if (a.length) return a[0].src;
+  const b = (p.pv && p.pv[0] && p.pv[0].attachedFiles_pv_images) || [];
+  return b.length ? b[0].src : '';
+}
+function gallery(p){
+  const a = (p.attachedFiles_p_images||[]).map(x=>x.src);
+  const b = ((p.pv&&p.pv[0]&&p.pv[0].attachedFiles_pv_images)||[]).map(x=>x.src);
+  return [...new Set([...a,...b])];
+}
+
+/* ---------- transport ---------- */
+function setConn(cls, text){ dot.className = 'dot ' + cls; connText.textContent = text; }
+
+async function search(q, page, per){
+  const url = `${API}?_page=${page}&_perPage=${per}&_search=${encodeURIComponent(q)}`;
+  try{
+    setConn('warn', 'live request…');
+    const r = await fetch(url, { headers:{ 'Accept':'application/json' } });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const json = await r.json();
+    setConn('ok', 'connected · direct');
+    return json;
+  }catch(e){
+    setConn('bad', 'blocked');
+    throw e;
+  }
+}
+
+/* ---------- rendering ---------- */
+function sortRows(rows, mode){
+  const r = [...rows];
+  const A = new Map(r.map(p => [p, analyse(p)]));
+  const by = {
+    mgB2b:   (a,b)=> A.get(b).mgB2b - A.get(a).mgB2b,
+    profit:  (a,b)=> A.get(b).profitB2b - A.get(a).profitB2b,
+    priceAsc:(a,b)=> A.get(a).b2b - A.get(b).b2b,
+    priceDesc:(a,b)=> A.get(b).b2b - A.get(a).b2b,
+    orders:  (a,b)=> (b.productCountOrdered||0) - (a.productCountOrdered||0)
+  }[mode];
+  return by ? r.sort(by) : r;
+}
+
+function card(p, i){
+  const a = analyse(p);
+  const img = image(p);
+  const off = a.v.pv_b2b_discount_percent || 0;
+  const unit = a.v.pu_b2b_sales_unit_label || a.v.pu_base_unit_label || '—';
+  const costW = a.mrp ? Math.min(100, a.cost / a.mrp * 100) : 0;
+  const b2bW  = a.mrp ? Math.max(0, Math.min(100, a.b2b / a.mrp * 100) - costW) : 0;
+
+  return `
+  <button class="card" data-i="${i}">
+    <div class="thumb">
+      ${img ? `<img src="${esc(img)}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'none',textContent:'no image'}))">`
+            : `<div class="none">no image</div>`}
+      <div class="flags">
+        ${p.p_is_flash_sale ? '<i class="flag sale">flash sale</i>' : ''}
+        ${!a.inStock ? '<i class="flag out">out of stock</i>' : ''}
+      </div>
+    </div>
+    <div class="body">
+      <div class="eyebrow"><span>${esc(p.p_brand_name || p.p_type || '—')}</span><span>${esc(unit)}</span></div>
+      <div class="name">${esc(p.p_name)}</div>
+      <div class="price-row">
+        <span class="p-b2b">${bdt(a.b2b)}</span>
+        ${a.mrp > a.b2b ? `<span class="p-mrp">${bdt(a.mrp)}</span>` : ''}
+        ${off ? `<span class="p-off">−${off}%</span>` : ''}
+      </div>
+      <div class="mini" title="cost / b2b margin / headroom to MRP">
+        <i style="width:${costW}%;background:var(--cost)"></i>
+        <i style="width:${b2bW}%;background:var(--b2b)"></i>
+      </div>
+      <div class="foot">
+        <span class="mg ${mgClass(a.mgB2b)}">${pct(a.mgB2b)} B2B</span>
+        <span>${bdt(a.profitB2b)}/unit · ${(p.productCountOrdered||0).toLocaleString()} sold</span>
+      </div>
+    </div>
+  </button>`;
+}
+
+function renderGrid(){
+  const rows = sortRows(state.rows, state.sort);
+  state.sorted = rows;
+  if (!rows.length){
+    out.innerHTML = `<div class="state"><h3>Nothing matched “${esc(state.q)}”</h3><p>Try a brand or a generic name — the search matches product titles.</p></div>`;
+    $('#pager').hidden = true; return;
+  }
+  out.innerHTML = `<div class="grid">${rows.map(card).join('')}</div>`;
+  out.querySelectorAll('.card').forEach(el =>
+    el.addEventListener('click', () => openDetail(state.sorted[+el.dataset.i])));
+
+  const pages = Math.max(1, Math.ceil(state.total / state.per));
+  $('#pager').hidden = false;
+  $('#pageLbl').textContent = `Page ${state.page} of ${pages}`;
+  $('#prev').disabled = state.page <= 1;
+  $('#next').disabled = state.page >= pages;
+  $('#count').innerHTML = `<b>${state.total.toLocaleString()}</b> results for “${esc(state.q)}” · showing ${rows.length}`;
+}
+
+/* ---------- detail drawer: the price teardown ---------- */
+function openDetail(p){
+  const a = analyse(p), v = a.v;
+  const pics = gallery(p);
+  const tags = (p.p_product_tags || []).slice(0, 14);
+
+  // waterfall breakpoints, works whichever of b2b/b2c is higher
+  const lowKey = a.b2b <= a.b2c ? 'B2B' : 'B2C';
+  const lo = Math.min(a.b2b, a.b2c), hi = Math.max(a.b2b, a.b2c);
+  const top = Math.max(a.mrp, hi, 1);
+  const w = n => Math.max(0, n / top * 100);
+  const segs = [
+    ['s-cost', w(a.cost),      'Cost ' + bdt(a.cost)],
+    ['s-a',    w(lo - a.cost), `${lowKey} margin ${bdt(lo - a.cost)}`],
+    ['s-b',    w(hi - lo),     `Spread ${bdt(hi - lo)}`],
+    ['s-head', w(top - hi),    `MRP headroom ${bdt(top - hi)}`]
+  ];
+
+  const conv = p.productCountViewed ? (p.productCountOrdered / p.productCountViewed * 100) : 0;
+
+  $('#drawer').innerHTML = `
+  <div class="d-head">
+    <div style="flex:1;min-width:0">
+      <div class="meta">
+        <span>${esc(p.p_brand_name || '—')}</span>
+        <span>pv ${v.pv_id ?? '—'}</span>
+        ${v.pv_sku ? `<span>${esc(v.pv_sku)}</span>` : ''}
+        <span>${a.inStock ? '<b>in stock</b>' : 'out of stock'}</span>
+      </div>
+      <h2>${esc(p.p_name)}</h2>
+      <div class="meta">
+        <span>★ ${v.pv_average_rating ?? '—'} (${v.pv_total_rating ?? 0})</span>
+        <span>unit ${esc(v.pu_base_unit_label || '—')}</span>
+        <span>cat ${p.p_cat_id ?? '—'}</span>
+      </div>
+    </div>
+    <button class="close" id="closeBtn" aria-label="Close">✕</button>
+  </div>
+
+  <div class="d-body">
+    <section>
+      <h4>Price ladder — cost to MRP</h4>
+      <div class="ladder">
+        <div class="track">
+          ${segs.filter(s => s[1] > 0.4).map(s =>
+            `<div class="seg ${s[0]}" style="width:${s[1]}%" title="${esc(s[2])}"><span>${esc(s[2])}</span></div>`).join('')}
+        </div>
+        <div class="scale"><span>৳0</span><span>${bdt(top)}</span></div>
+        <div class="legend">
+          <div class="lg" style="border-color:var(--cost)"><div class="k">Purchase</div><div class="v">${bdt(a.cost)}</div><div class="s">what it costs</div></div>
+          <div class="lg" style="border-color:var(--b2b)"><div class="k">B2B price</div><div class="v" style="color:var(--b2b)">${bdt(a.b2b)}</div><div class="s">−${v.pv_b2b_discount_percent||0}% off MRP</div></div>
+          <div class="lg" style="border-color:var(--b2c)"><div class="k">B2C price</div><div class="v" style="color:var(--b2c)">${bdt(a.b2c)}</div><div class="s">−${v.pv_b2c_discount_percent||0}% off MRP</div></div>
+          <div class="lg" style="border-color:var(--mrp)"><div class="k">MRP</div><div class="v" style="color:var(--muted)">${bdt(a.mrp)}</div><div class="s">list ceiling</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h4>Margin analysis</h4>
+      <div class="tiles">
+        <div class="tile hl"><div class="k">B2B margin</div><div class="v" style="color:var(--b2b)">${pct(a.mgB2b)}</div><div class="s">${bdt(a.profitB2b)} per unit</div></div>
+        <div class="tile"><div class="k">B2B markup</div><div class="v">${pct(a.mkB2b)}</div><div class="s">over cost</div></div>
+        <div class="tile"><div class="k">B2C margin</div><div class="v" style="color:var(--b2c)">${pct(a.mgB2c)}</div><div class="s">${bdt(a.profitB2c)} per unit</div></div>
+        <div class="tile"><div class="k">B2B → B2C spread</div><div class="v">${bdt(a.spread)}</div><div class="s">resale room</div></div>
+      </div>
+      <table class="kv" style="margin-top:16px">
+        <tr><td>Profit if you buy at B2B and resell at B2C</td><td style="color:var(--b2b)">${bdt(a.spread)} <span style="color:var(--dim)">(${pct(a.b2b ? a.spread/a.b2b*100 : 0)})</span></td></tr>
+        <tr><td>Profit if you resell at MRP</td><td>${bdt(a.mrp - a.b2b)} <span style="color:var(--dim)">(${pct(a.b2b ? (a.mrp-a.b2b)/a.b2b*100 : 0)})</span></td></tr>
+        <tr><td>Full-case value at max B2B qty (${v.pv_b2b_max_qty ?? '—'})</td><td>${bdt(a.b2b * (v.pv_b2b_max_qty||0))}</td></tr>
+        <tr><td>Profit on that case</td><td>${bdt(a.profitB2b * (v.pv_b2b_max_qty||0))}</td></tr>
+        <tr><td><code style="font-family:var(--mono);color:var(--dim)">pv_m_percentage</code> from API</td><td>${pct(v.pv_m_percentage)}</td></tr>
+      </table>
+      <div class="note">The API's <b>pv_m_percentage</b> is the <b>B2C</b> margin — (b2c price − purchase) ÷ b2c price. It says nothing about your B2B economics. On this item the real B2B margin is <b>${pct(a.mgB2b)}</b> against the API's ${pct(v.pv_m_percentage)}.</div>
+    </section>
+
+    <section>
+      <h4>Order limits &amp; units</h4>
+      <table class="kv">
+        <tr><td>B2B quantity</td><td>${v.pv_b2b_min_qty ?? '—'} – ${v.pv_b2b_max_qty ?? '—'} ${esc(v.pu_b2b_sales_unit_label||'')}</td></tr>
+        <tr><td>B2C quantity</td><td>${v.pv_b2c_min_qty ?? '—'} – ${v.pv_b2c_max_qty ?? '—'} ${esc(v.pu_b2c_sales_unit_label||'')}</td></tr>
+        <tr><td>Base unit</td><td>${esc(v.pu_base_unit_label||'—')} × ${v.pu_base_unit_multiplier ?? 1}</td></tr>
+        <tr><td>Sales allowed</td><td>${p.p_allow_sales ? 'yes' : 'no'} · purchase ${v.pv_allow_purchase ? 'yes' : 'no'}</td></tr>
+        <tr><td>Delivery</td><td>${p.p_is_not_allowed_outside_dhaka ? 'Dhaka only' : 'nationwide'}${p.p_cold ? ' · cold chain' : ''}</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h4>Demand signal</h4>
+      <div class="tiles">
+        <div class="tile"><div class="k">Viewed</div><div class="v">${(p.productCountViewed||0).toLocaleString()}</div></div>
+        <div class="tile"><div class="k">Ordered</div><div class="v">${(p.productCountOrdered||0).toLocaleString()}</div></div>
+        <div class="tile"><div class="k">View → order</div><div class="v">${pct(conv)}</div></div>
+        <div class="tile"><div class="k">Wishlisted</div><div class="v">${(p.productCountWishlist||0).toLocaleString()}</div><div class="s">trend ${v.pv_trending_score ?? '—'}</div></div>
+      </div>
+    </section>
+
+    ${pics.length ? `<section><h4>Images (${pics.length})</h4><div class="gal">${pics.map(s=>`<img src="${esc(s)}" alt="" loading="lazy" onclick="window.open(this.src,'_blank')">`).join('')}</div></section>` : ''}
+
+    ${p.p_short_description ? `<section><h4>Description</h4><div class="desc">${esc(p.p_short_description)}</div></section>` : ''}
+
+    ${tags.length ? `<section><h4>Campaign tags</h4><div class="tags">${tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div></section>` : ''}
+
+    <section>
+      <details><summary>Raw record ▾</summary><pre>${esc(JSON.stringify(p,null,2))}</pre></details>
+    </section>
+  </div>`;
+
+  $('#drawer').classList.add('on');
+  $('#scrim').classList.add('on');
+  document.body.style.overflow = 'hidden';
+  $('#closeBtn').addEventListener('click', closeDetail);
+  $('#closeBtn').focus();
+}
+
+function closeDetail(){
+  $('#drawer').classList.remove('on');
+  $('#scrim').classList.remove('on');
+  document.body.style.overflow = '';
+}
+
+/* ---------- run ---------- */
+async function run(page = 1){
+  const q = $('#q').value.trim();
+  if (!q){ $('#q').focus(); return; }
+  state.q = q; state.page = page; state.per = +$('#per').value;
+
+  out.innerHTML = `<div class="grid">${Array.from({length:8},()=>'<div class="skel"></div>').join('')}</div>`;
+  $('#pager').hidden = true;
+  $('#count').textContent = 'Searching…';
+
+  try{
+    const r = await search(q, page, state.per);
+    state.rows = r.data || [];
+    state.total = r.total || state.rows.length;
+    renderGrid();
+    history.replaceState(null,'','#'+encodeURIComponent(q));
+  }catch(e){
+    $('#count').textContent = '';
+    out.innerHTML = `<div class="state">
+      <h3>The direct request didn't get through</h3>
+      <p>This usually means the API is unreachable or the request is being blocked by the browser environment.<br>
+      Serve this file over <code>http://</code> rather than <code>file://</code> and confirm the endpoint is reachable.</p>
+      <p style="margin-top:14px"><code>${esc(e.message||e)}</code></p>
+    </div>`;
+  }
+}
+
+/* wiring */
+$('#goBtn').addEventListener('click', () => run(1));
+$('#q').addEventListener('keydown', e => { if (e.key === 'Enter') run(1); });
+$('#sort').addEventListener('change', e => { state.sort = e.target.value; if (state.rows.length) renderGrid(); });
+$('#per').addEventListener('change', () => { if (state.q) run(1); });
+$('#prev').addEventListener('click', () => run(state.page - 1));
+$('#next').addEventListener('click', () => run(state.page + 1));
+$('#scrim').addEventListener('click', closeDetail);
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeDetail();
+  if (e.key === '/' && document.activeElement !== $('#q')){ e.preventDefault(); $('#q').focus(); }
+});
+
+['simple','cetaphil','napa','vitamin c serum','sunscreen','dettol'].forEach(t=>{
+  const b = document.createElement('button');
+  b.className = 'chip'; b.textContent = t;
+  b.onclick = () => { $('#q').value = t; run(1); };
+  $('#chips').appendChild(b);
+});
+
+const seed = decodeURIComponent(location.hash.slice(1));
+$('#q').value = seed || 'simple';
+run(1);
+</script>
+</body>
+</html>
